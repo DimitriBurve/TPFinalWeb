@@ -167,6 +167,7 @@
     // document.getElementById("imgs").innerHTML = '<div id=maDiv class=card> <img src=' + tabPictures[indexImg] + ' width="360" height="240" ></div>';
 
     var indexImage = 0;
+    var score = 0;
 
     function lanceJeu() {
         var sortie = false;
@@ -175,12 +176,17 @@
         }
     }
 
+    function finJeu() {
+        console.log(score);
+    }
+
     function testDistance(lat, long, d) {
         console.log("lat lng img : " + lat + ", " + long);
         console.log("lat lng click : " + latClick + ", " + longClick);
         var diffLat = lat - latClick;
         var diffLong = long - longClick;
         if ((diffLat < d && diffLong < d) || (latClick !== null || longClick !== null)) {
+            score+=5;
             return true;
         }
         else {
