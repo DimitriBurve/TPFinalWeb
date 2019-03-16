@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+
+    <style>
+
+        #mapid { height: 380px; width: 680px; }
+
+        /* déclaration pour les markers */
+        .circle {
+            box-sizing: border-box;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.3);
+            box-shadow: 0 0 10px #888;
+        }
+        .circle-marker {
+            box-sizing: border-box;
+            width: 30px;
+            height: 30px;
+        }
+        .circle-red {
+            border: 5px solid #F00;
+        }
+        .circle-green {
+            border: 5px solid #0A0;
+        }
+        .circle-animate {
+            animation-name: show-hide;
+            animation-duration: 1s;
+            animation-iteration-count: infinite;
+            transform: scale(1);
+        }
+        @keyframes show-hide {
+            0%   { transform: scale(1);}
+            50%  { transform: scale(.5);}
+            100% { transform: scale(1);}
+        }
+
+    </style>
+    <title>TPFINAL</title>
+
+</head>
+
+<body>
+
+<div id="mapid"></div>
+<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+
+<script>
+
+    var tabPictures = [
+        ["https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/2014-09-15_16-14-55_lion-belfort.jpg/390px-2014-09-15_16-14-55_lion-belfort.jpg"],
+        ["https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Lagaredebelfortcentre.jpg/420px-Lagaredebelfortcentre.jpg"],
+        ["http://www.ac-besancon.fr/local/cache-vignettes/L300xH182/batiment-iut-90credit_photoccludovicgodard-ufc-a680b.jpg?1547717515"],
+        ["https://upload.wikimedia.org/wikipedia/fr/thumb/8/85/Gare_de_Belfort-Montb%C3%A9liard_TGV.jpg/420px-Gare_de_Belfort-Montb%C3%A9liard_TGV.jpg"],
+        ["https://cdn-s-www.estrepublicain.fr/images/792C8934-2418-40B9-8B48-C34D1488B4B1/LER_22/le-bowling-a-six-pistes-illuminees-de-leds-fait-la-fierte-des-proprietaires-du-complexe-photos-xavier-gorau-1456149615.jpg"],
+        ["https://laplacedufitness.com/wp-content/uploads/basic-fit-belfort.jpg"],
+        ["https://photos.leclercdrive.fr/photo/leclerc-traiteur-belfort/magasin.ashx?idunivers=4&idmarque=2&idmagasin=019061"],
+        ["https://www.belfort.fr/fileadmin/Minisites/sport/equipements/stades/stade_3_chenes.jpg"],
+        ["https://static4.pagesjaunes.fr/media/ugc/base_nautique_et_de_loisirs_du_lac_du_malsaucy_09009300_065754622"],
+        ["https://i.pinimg.com/originals/c9/7f/22/c97f22f28a6e40936e2be3329d0fa0eb.jpg"]
+    ];
+
+    var NomTabPictures = [
+        ["Lion de Belfort"],
+        ["Gare de Belfort"],
+        ["IUT Belfort"],
+        ["Gare TGV"],
+        ["Bowling de Belfort"],
+        ["Basic Fit Belfort"],
+        ["Leclerc Belfort"],
+        ["Stade des 3 Chênes"],
+        ["Base de loisir du Lac du Malsaucy"],
+        ["BU de Belfort"]
+    ];
+
+    var coordonneesPictures = [
+        [47.636673, 6.864578],
+        [47.633557, 6.853795],
+        [47.643793, 6.840663],
+        [47.585905, 6.897526],
+        [47.638979, 6.855125],
+        [47.64195, 6.858065],
+        [47.627888, 6.862636],
+        [47.647306, 6.844933],
+        [47.684531, 6.808305],
+        [47.640045, 6.856992]
+    ];
+
+    var mymap = L.map('mapid').setView([47.6333,  6.8667], 13);
+
+    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(mymap);
+
+    mymap.on('click', onMapClick);
+    // fonction affichant un marker lors du clic sur un point de la carte. mofication de l'affichage de la souris
+
+
+    var oIconRed = L.divIcon({
+        iconAnchor : [15, 15],
+        className: 'circle-marker',
+        html: '<div class="circle-animate circle circle-red"></div>'
+    });
+
+    var oMarkerGreen = L.marker( [0,0], {icon: oIconRed});
+
+    function onMapClick(e) {
+        oMarkerGreen.setLatLng([e.latlng.lat, e.latlng.lng]).addTo(this);
+        console.log("latitude : " + e.latlng.lat);
+        console.log("longitude : " + e.latlng.lng);
+    }
+
+</script>
+
+</body>
+
+</html>
