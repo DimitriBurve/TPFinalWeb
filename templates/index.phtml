@@ -145,6 +145,14 @@
         console.log("longitude : " + e.latlng.lng);
         latClick = e.latlng.lat;
         longClick = e.latlng.lat;
+        if (testDistance(coordonneesPictures[indexImage][0], coordonneesPictures[indexImage][1], 0.1)) {
+            indexImage+=1;
+            if (indexImage < tabPictures.length) {
+                lanceJeu();
+            } else {
+                finJeu();
+            }
+        }
     }
 
 
@@ -164,19 +172,6 @@
         var sortie = false;
         if (indexImage < tabPictures.length) {
             document.getElementById("imgs").innerHTML = '<div id=maDiv class=card> <img src=' + tabPictures[indexImage] + ' width="360" height="240" ></div>';
-
-            if (testDistance(coordonneesPictures[indexImage][0], coordonneesPictures[indexImage][1], 0.1)) {
-                console.log("test true");
-                indexImage++;
-
-            } else {
-                console.log("test faux");
-            }
-        } else {
-            sortie = true;
-        }
-        if (!sortie) {
-            setTimeout(lanceJeu(), 2);
         }
     }
 
