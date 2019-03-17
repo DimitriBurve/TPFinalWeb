@@ -75,6 +75,8 @@
     </form>
 </nav>
 
+<h2 id="AfficheName" style="display: none"></h2>
+
 <div id="formulaireLogin">
     <div>
         <label for="Id">Id :</label>
@@ -247,6 +249,7 @@
     }
 
     var resultTokenLogin = false;
+    var token = "";
 
     $(function () {
         $.get("/getToken").done(function (result) {
@@ -265,14 +268,18 @@
             $.post("/login", {"id": idClient, "pwd": pwdClient, "token": token}).done(function (result) {
                 // console.log(result["res"]);
                 resultTokenLogin = result["res"];
+                console.log("test res");
                 console.log(resultTokenLogin);
                 if (resultTokenLogin) {
+                    lanceJeu();
                     document.getElementById("formulaireLogin").style.display = "none";
                     // console.log(picture[0]['items'][0]['description']);
                     document.getElementById("AfficheName").innerHTML = "Hello "+idClient;
                     document.getElementById("AfficheName").style.display = "block";
                     afficheDisconnect();
                 }
+            }).fail(function (error) {
+                alert(error);
             });
 
         });

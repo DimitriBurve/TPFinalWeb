@@ -49,19 +49,19 @@ $app->post('/login', function (Request $request, Response $response, array $args
 
     global $users;
 
-    var_dump($todos->Mdp);
+//    var_dump($todos->Mdp);
 //    var_dump($posts_data);
 //    var_dump($tokenClient);
     if ($token == $tokenClient){
         $testTmp = false;
-        for ($i=0; $i< sizeof($users);$i++){
-            if ($users[$i][0]== $id && $users[$i][1] == $pwd){
-                $testTmp =true;
-                break;
-            }
+
+        if ($todos->Mdp == $pwd){
+            $testTmp =true;
         }
+
         if ($testTmp==true) {
             $res = true;
+//            var_dump("true");
             return $response->withJson(array("res" => $res));
         }else{
             $res = false;
