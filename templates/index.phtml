@@ -103,13 +103,16 @@
     <input type="button" id="register2" value="register">
 </div>
 
-<div id="divBtnStart">
+<div id="divBtnStart" style="display: none">
     <button id="btnStart">start</button>
 </div>
 <br>
+<div id="divScore" style="display: none">
+    <p>Score :</p>
+</div>
 <div>
     <section id="imgs" style="float: left; width: 380px"></section>
-    <div id="mapid" style="float: left"></div>
+    <div id="mapid" style="float: left; display: none"></div>
 </div>
 
 <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
@@ -208,6 +211,9 @@
 
     function lanceJeu() {
         var sortie = false;
+        document.getElementById("divBtnStart").style.display = "block" ;
+        document.getElementById("divScore").style.display = "block";
+        document.getElementById("mapid").style.display = "block";
         if (indexImage < tabPictures.length) {
             document.getElementById("imgs").innerHTML = '<div id=maDiv class=card> <img src=' + tabPictures[indexImage] + ' width="360" height="240" ></div>';
         }
