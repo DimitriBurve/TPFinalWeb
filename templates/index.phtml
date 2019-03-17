@@ -3,7 +3,9 @@
 
 <head>
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css"/>
-
+    <link href='//fonts.googleapis.com/css?family=Lato:300' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <style>
 
         #mapid {
@@ -66,6 +68,39 @@
 
 <body>
 
+<nav class="navbar navbar-light bg-light">
+    <form class="form-inline">
+        <input class="btn btn-outline-success" id="navConnect" type="button" value="connect" onclick="afficheConnect()">
+        <input class="btn btn-sm btn-outline-secondary" id="navRegis" type="button" value="register">
+    </form>
+</nav>
+
+<div id="formulaireLogin">
+    <div>
+        <label for="Id">Id :</label>
+        <input type="text" id="Id" name="user_Id">
+    </div>
+    <div>
+        <label for="pwd">password :</label>
+        <input type="password" id="pwd" name="user_pwd">
+    </div>
+    <input type="button" id="register" value="register">
+    <input type="button" id="connect" value="connect">
+</div>
+
+<div id="formulaireRegis" style="display: none">
+    <div>
+        <label for="Id">Id :</label>
+        <input type="text" id="IdRegis" name="user_Id" onblur="verifIdClient(this)"><label id="labelId"></label>
+    </div>
+    <div>
+        <label for="pwd">password :</label>
+        <input type="password" id="pwdRegis" name="user_pwd" oninput="verifPwdClient(this)"><label
+                id="labelPwd"></label>
+    </div>
+    <input type="button" id="register2" value="register">
+</div>
+
 <div id="divBtnStart">
     <button id="btnStart">start</button>
 </div>
@@ -77,7 +112,7 @@
 
 <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-<script>
+<script type="text/javascript">
 
     var tabPictures = [
         ["https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/2014-09-15_16-14-55_lion-belfort.jpg/390px-2014-09-15_16-14-55_lion-belfort.jpg"],
@@ -198,6 +233,94 @@
     $('#btnStart').click(function () {
         lanceChrono();
         lanceJeu();
+    });
+
+    function afficheDisconnect(){
+        if (document.getElementById("AfficheName").value !== null){
+            document.getElementById("navConnect").value = "disconnect";
+        }
+    }
+
+    function afficheConnect(){
+        document.getElementById("navConnect").value = "connect";
+        document.getElementById("AfficheName").innerHTML = "";
+    }
+
+    var resultTokenLogin = false;
+
+    $(function () {
+        $.get("/getToken").done(function (result) {
+            // token = JSON.parse(result);
+            token = result["token"];
+
+            console.log(token);
+        });
+
+        $('#connect').click(function () {
+            var idClient = document.getElementById("Id").value;
+            var pwdClient = document.getElementById("pwd").value;
+            console.log(idClient);
+            console.log(token);
+
+            $.post("/login", {"id": idClient, "pwd": pwdClient, "token": token}).done(function (result) {
+                // console.log(result["res"]);
+                resultTokenLogin = result["res"];
+                console.log(resultTokenLogin);
+                if (resultTokenLogin) {
+                    document.getElementById("formulaireLogin").style.display = "none";
+                    // console.log(picture[0]['items'][0]['description']);
+                    document.getElementById("AfficheName").innerHTML = "Hello "+idClient;
+                    document.getElementById("AfficheName").style.display = "block";
+                    afficheDisconnect();
+                }
+            });
+
+        });
+
+        $('#register').click(function () {
+            document.getElementById("formulaireLogin").style.display = "none";
+            document.getElementById("formulaireRegis").style.display = "block";
+            document.getElementById("news").style.display = "none";
+        });
+
+        $('#register2').click(function () {
+            var idClient = document.getElementById("IdRegis").value;
+            var pwdClient = document.getElementById("pwdRegis").value;
+
+            console.log(idClient);
+            console.log(pwdClient);
+
+            if (idClient.length < 2 && pwdClient.length < 8) {
+
+            } else {
+                $.post("/register", {"id": idClient, "pwd": pwdClient}).done(function (result) {
+                    var resultRegis = result["res"];
+                    console.log(resultRegis);
+                    if (resultRegis) {
+                        document.getElementById("formulaireRegis").style.display = "none";
+                        document.getElementById("AfficheName").innerHTML = "Hello "+idClient;
+                        document.getElementById("AfficheName").style.display = "block";
+                        afficheImages();
+                        afficheDisconnect();
+                    } else {
+                        alert("id deja utilisé");
+                    }
+                });
+            }
+        });
+
+        $('#navConnect').click(function () {
+            document.getElementById("formulaireLogin").style.display = "block";
+            document.getElementById("formulaireRegis").style.display = "none";
+            document.getElementById("news").style.display = "none";
+        });
+
+        $('#navRegis').click(function () {
+            document.getElementById("formulaireLogin").style.display = "none";
+            document.getElementById("formulaireRegis").style.display = "block";
+            document.getElementById("news").style.display = "none";
+        });
+
     });
 
 
