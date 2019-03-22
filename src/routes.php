@@ -21,6 +21,21 @@ $app->get('/', function (Request $request, Response $response, array $args) {
     return $this->renderer->render($response, 'index.phtml', $args);
 });
 
+
+$app->get('/game/id={id}',function (Request $request, Response $response, array $args){
+//    var_dump($args['id']);
+    $sth = $this->db->prepare("SELECT id FROM player WHERE Name=:id");
+    $sth->bindParam("id", $args['id']);
+    $sth->execute();
+    $todos = $sth->fetchObject();
+    $sth2 = $this->db->prepare("SELECT * FROM partie WHERE idPlayer=:id");
+    $sth2->bindParam("id", $todos->id);
+    $sth2->execute();
+    $todos2 = $sth2->fetchAll();
+//    var_dump($todos2);
+    return $response->withJson(array("requete"=>$todos2));
+});
+
 $app->get('/todos', function (Request $request, Response $response, array $args) {
     $sth = $this->db->prepare("SELECT * FROM player ORDER BY Name");
     $sth->execute();
@@ -63,6 +78,7 @@ $app->post('/login', function (Request $request, Response $response, array $args
             $res = true;
 //            var_dump("true");
             return $response->withJson(array("res" => $res));
+//            return $this->renderer->render($response, 'game.html', $args);
         }else{
             $res = false;
             return $response->withJson(array("res"=>$res));
