@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 4.8.4
+-- version 4.8.3
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le :  ven. 22 mars 2019 à 20:37
--- Version du serveur :  5.7.24
--- Version de PHP :  7.2.14
+-- Généré le :  ven. 22 mars 2019 à 23:08
+-- Version du serveur :  5.7.23
+-- Version de PHP :  7.2.10
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
@@ -48,7 +48,11 @@ CREATE TABLE IF NOT EXISTS `partie` (
 INSERT INTO `partie` (`id`, `token`, `enCours`, `NumPhoto`, `time`, `Score`, `idPlayer`) VALUES
 (1, '1dfggdfs5qsf549qsdf68493qsf35', 1, 4, '00:25:00', 15, 1),
 (2, '5dfd64qfq6468eqzf6', 0, 10, '00:56:00', 50, 1),
-(3, 'sdfgklj5qsf654fqfsdqg6', 1, 7, '00:48:00', 35, 1);
+(3, 'sdfgklj5qsf654fqfsdqg6', 1, 7, '00:48:00', 35, 1),
+(5, '38b3992e95c99f4f77e0e24a5d9a451f1b317bf6', 1, 6, '00:00:04', 0, 1),
+(6, '38b3992e95c99f4f77e0e24a5d9a451f1b317bf6', 1, 7, '00:00:07', 0, 1),
+(7, '38b3992e95c99f4f77e0e24a5d9a451f1b317bf6', 1, 3, '00:00:04', 0, 1),
+(4, '38b3992e95c99f4f77e0e24a5d9a451f1b317bf6', 1, 4, '00:00:09', 0, 1);
 
 -- --------------------------------------------------------
 
@@ -82,19 +86,17 @@ INSERT INTO `player` (`id`, `Name`, `Mdp`, `EnCours`, `scoreEnCours`) VALUES
 DROP TABLE IF EXISTS `score`;
 CREATE TABLE IF NOT EXISTS `score` (
   `id` int(11) NOT NULL,
-  `idPlayer` int(11) NOT NULL,
   `score` int(11) NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_id_Player` (`idPlayer`)
+  KEY `fk_id_Player` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Déchargement des données de la table `score`
 --
 
-INSERT INTO `score` (`id`, `idPlayer`, `score`) VALUES
-(1, 1, 555),
-(2, 1, 333);
+INSERT INTO `score` (`id`, `score`) VALUES
+(1, 555),
+(1, 333);
 
 --
 -- Contraintes pour les tables déchargées
@@ -104,7 +106,7 @@ INSERT INTO `score` (`id`, `idPlayer`, `score`) VALUES
 -- Contraintes pour la table `score`
 --
 ALTER TABLE `score`
-  ADD CONSTRAINT `fk_id_Player` FOREIGN KEY (`idPlayer`) REFERENCES `player` (`id`);
+  ADD CONSTRAINT `fk_id_Player` FOREIGN KEY (`id`) REFERENCES `player` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
