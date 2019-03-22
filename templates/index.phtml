@@ -232,7 +232,7 @@
 
     function lanceJeu() {
         var sortie = false;
-        document.getElementById("divBtnStart").style.display = "block";
+        // document.getElementById("divBtnStart").style.display = "block";
         document.getElementById("divScore").style.display = "block";
         document.getElementById("mapid").style.display = "block";
         document.getElementById("score").innerText = score;
@@ -275,8 +275,41 @@
 
 
     $('#btnStart').click(function () {
-        lanceChrono();
-        lanceJeu();
+        $.post("/game/add", {"id": nbId+1, "token": token, "enCours": 1, "NumPhoto":indexImage, "time":secondes, "Score":score, "idPlayer":idClient}).done(function () {
+            idPartie=nbId+1;
+            lanceChrono();
+            lanceJeu();
+            document.getElementById("idParties").style.display = "none";
+            document.getElementById("btnStart").style.display = "none";
+        }).fail(function (error) {
+            alert(error);
+        });
+
+    });
+
+    var idPartie;
+
+    $('#btn_stop').click(function () {
+        $.post("/game/update", {"id": idPartie, "token": token, "enCours": 1, "NumPhoto":indexImage, "time":secondes, "Score":score, "idPlayer":idClient}).done(function () {
+            $.get("/game/id=" + idClient).done(function (result) {
+                console.log(result["requete"]);
+                nbId = result["requete"].length;
+                document.getElementById("imgs").style.display = "none";
+                document.getElementById("mapid").style.display = "none";
+                document.getElementById("divScore").style.display = "none";
+                affichePartie(result["requete"]);
+                document.getElementById("idParties").style.display = "block";
+                // document.getElementById("formulaireLogin").style.display = "none";
+                document.getElementById("AfficheName").innerHTML = "Hello " + idClient;
+                document.getElementById("AfficheName").style.display = "block";
+                document.getElementById("divBtnStart").style.display = "block";
+
+            }).fail(function (error) {
+                alert(error);
+            })
+        }).fail(function (error) {
+            alert(error);
+        });
     });
 
     function afficheDisconnect() {
@@ -286,6 +319,7 @@
     }
 
     function affichePartie(tab) {
+        document.getElementById("idParties").innerHTML = "";
         for (let i = 0; i < tab.length; i++) {
             if (tab[i]["enCours"] == 1) {
                 document.getElementById("idParties").innerHTML = document.getElementById("idParties").innerHTML + "<tr> <td> id : " + tab[i]["id"] + " </td> <td> token : " + tab[i]["token"] + " </td> <td> en cours : oui </td> <td> Derniere photo : " + tab[i]["NumPhoto"] + " </td> <td> temps écoulé : " + tab[i]["time"] + " </td> <td> Score : " + tab[i]["Score"] + " </td> <td> <a id=\"id\" onclick=\"reprendrePartie(" + tab[i]["id"] + ")\">rependre partie</a> </td> </tr><br>";
@@ -296,7 +330,7 @@
     }
 
     function reprendrePartie(id) {
-
+        console.log(id);
     }
 
     function afficheConnect() {
@@ -306,6 +340,10 @@
 
     var resultTokenLogin = false;
     var token = "";
+    var idClient;
+    var idPlayer;
+    var NumPhoto;
+    var nbId;
 
     $(function () {
         $.get("/getToken").done(function (result) {
@@ -316,7 +354,7 @@
         });
 
         $('#connect').click(function () {
-            var idClient = document.getElementById("Id").value;
+            idClient = document.getElementById("Id").value;
             var pwdClient = document.getElementById("pwd").value;
             console.log(idClient);
             console.log(token);
@@ -329,11 +367,13 @@
 
                 if (resultTokenLogin) {
                     $.get("/game/id=" + idClient).done(function (result2) {
-                        console.log(result2["requete"]);
+                        // console.log(result2["requete"]);
+                        nbId = result2["requete"].length;
                         affichePartie(result2["requete"]);
                         document.getElementById("formulaireLogin").style.display = "none";
                         document.getElementById("AfficheName").innerHTML = "Hello " + idClient;
                         document.getElementById("AfficheName").style.display = "block";
+                        document.getElementById("divBtnStart").style.display = "block";
                     }).fail(function (error) {
                         alert(error);
                     })
