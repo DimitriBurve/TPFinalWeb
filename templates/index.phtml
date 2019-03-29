@@ -131,7 +131,7 @@
 <br>
 <div>
     <section id="imgs" style="float: left; width: 380px"></section>
-    <div id="mapid" style="float: left; display: none"></div>
+    <div id="mapid" style="float: left;"></div>
 </div>
 
 <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
@@ -204,20 +204,18 @@
         console.log("longitude : " + e.latlng.lng);
         latClick = e.latlng.lat;
         longClick = e.latlng.lng;
-        if (testDistance(coordonneesPictures[indexImage][0], coordonneesPictures[indexImage][1], 50)) {
+        var diffTemps = secondes - time2;
+        console.log("temps click : "+secondes);
+        console.log("diff temps : "+diffTemps);
+        if (testDistance(coordonneesPictures[indexImage][0], coordonneesPictures[indexImage][1], 50, diffTemps)) {
             indexImage += 1;
             if (indexImage < tabPictures.length) {
-                lanceJeu();
+                lanceJeu(indexImage);
             } else {
                 finJeu();
             }
         }
     }
-
-
-    // for (let i = 0; i < tabPictures.length; i++) {
-    //     $('#imgs').append('<div id=maDiv class=card> <img src=' + tabPictures[i] + ' width="360" height="240" alt="The Best for 2019 !!" ></div>');
-    // }
 
     function lanceChrono() {
         console.log("start");
@@ -229,28 +227,73 @@
 
     var indexImage = 0;
     var score = 0;
+    var time2;
 
-    function lanceJeu() {
+    function lanceJeu(index) {
         var sortie = false;
         // document.getElementById("divBtnStart").style.display = "block";
+        document.getElementById("imgs").style.display = "block";
         document.getElementById("divScore").style.display = "block";
         document.getElementById("mapid").style.display = "block";
         document.getElementById("score").innerText = score;
-        if (indexImage < tabPictures.length) {
-            document.getElementById("imgs").innerHTML = '<div id=maDiv class=card> <img src=' + tabPictures[indexImage] + ' width="360" height="240" ></div>';
+        time2 = secondes;
+        if (index < tabPictures.length) {
+            console.log("temps debut : "+secondes);
+            document.getElementById("imgs").innerHTML = '<div id=maDiv class=card> <img src=' + tabPictures[index] + ' width="360" height="240" ></div>';
         }
     }
 
     function finJeu() {
+        $.post("/game/update", {"id": idPartie, "token": token, "enCours": 0, "NumPhoto":indexImage, "time":seconds2time(secondes), "Score":score, "idPlayer":idClient}).done(function () {
+            $.get("/game/id=" + idClient).done(function (result) {
+                console.log(result["requete"]);
+                nbId = result["requete"].length;
+                document.getElementById("imgs").style.display = "none";
+                document.getElementById("mapid").style.display = "none";
+                document.getElementById("divScore").style.display = "none";
+                affichePartie(result["requete"]);
+                document.getElementById("idParties").style.display = "block";
+                // document.getElementById("formulaireLogin").style.display = "none";
+                document.getElementById("AfficheName").innerHTML = "Hello " + idClient;
+                document.getElementById("AfficheName").style.display = "block";
+                document.getElementById("divBtnStart").style.display = "block";
+
+            }).fail(function (error) {
+                alert("error return menu");
+            })
+        }).fail(function (error) {
+            alert("error update");
+        });
         console.log(score);
     }
 
-    function testDistance(lat, long, d) {
+    function getMulti(diffTemps) {
+        var multi;
+        if (diffTemps < 2) {
+            multi = 4;
+        }else if (diffTemps < 5) {
+            multi = 2;
+        }else if (diffTemps < 10) {
+            multi = 1;
+        }else {
+            multi = 0;
+        }
+
+        return multi;
+    }
+
+    function testDistance(lat, long, d, diffTemps) {
         console.log("lat lng img : " + lat + ", " + long);
         console.log("lat lng click : " + latClick + ", " + longClick);
         var res = Distance(lat, long, latClick, longClick);
+
+        var multiScore = getMulti(diffTemps);
         if ((res < d) && (latClick !== null && longClick !== null)) {
-            score += 5;
+            score += 5*multiScore;
+        }else if ((res < 2*d) && (latClick !== null && longClick !== null)) {
+            score += 3*multiScore;
+        }else if ((res < 3*d) && (latClick !== null && longClick !== null)) {
+            score += 1*multiScore;
         }
         document.getElementById("score").innerText = score;
         return true;
@@ -278,7 +321,7 @@
         $.post("/game/add", {"id": nbId+1, "token": token, "enCours": 1, "NumPhoto":indexImage, "time":secondes, "Score":score, "idPlayer":idClient}).done(function () {
             idPartie=nbId+1;
             lanceChrono();
-            lanceJeu();
+            lanceJeu(0);
             document.getElementById("idParties").style.display = "none";
             document.getElementById("btnStart").style.display = "none";
         }).fail(function (error) {
@@ -287,10 +330,33 @@
 
     });
 
+    function seconds2time (secondes) {
+        var hours   = Math.floor(secondes / 3600);
+        var minutes = Math.floor((secondes - (hours * 3600)) / 60);
+        var seconds = secondes - (hours * 3600) - (minutes * 60);
+        var time = "";
+
+        if (hours != 0) {
+            time = hours+":";
+        }
+        if (minutes != 0 || time !== "") {
+            minutes = (minutes < 10 && time !== "") ? "0"+minutes : String(minutes);
+            time += minutes+":";
+        }
+        if (time === "") {
+            time = seconds;
+        }
+        else {
+            time += (seconds < 10) ? "0"+seconds : String(seconds);
+        }
+        return time;
+    }
+
     var idPartie;
 
     $('#btn_stop').click(function () {
-        $.post("/game/update", {"id": idPartie, "token": token, "enCours": 1, "NumPhoto":indexImage, "time":secondes, "Score":score, "idPlayer":idClient}).done(function () {
+        console.log("idPartie : "+idPartie);
+        $.post("/game/update", {"id": idPartie, "token": token, "enCours": 1, "NumPhoto":indexImage, "time":seconds2time(secondes), "Score":score, "idPlayer":idClient}).done(function () {
             $.get("/game/id=" + idClient).done(function (result) {
                 console.log(result["requete"]);
                 nbId = result["requete"].length;
@@ -320,23 +386,32 @@
 
 
     function affichePartie(tab) {
+        document.getElementById("idParties").style.display = "block";
         document.getElementById("idParties").innerHTML = "";
         for (let i = 0; i < tab.length; i++) {
             if (tab[i]["enCours"] == 1) {
-                document.getElementById("idParties").innerHTML = document.getElementById("idParties").innerHTML + "<tr> <td> id : " + tab[i]["id"] + " </td> <td> token : " + tab[i]["token"] + " </td> <td> en cours : oui </td> <td> Derniere photo : " + tab[i]["NumPhoto"] + " </td> <td> temps écoulé : " + tab[i]["time"] + " </td> <td> Score : " + tab[i]["Score"] + " </td> <td> <a id=\"id\" onclick=\"reprendrePartie(" + tab[i]["id"] + ")\">rependre partie</a> </td> </tr><br>";
+                var StringId = "id="+tab[i]["id"]+" onclick=reprendrePartie("+tab[i]["id"]+","+tab[i]["NumPhoto"]+")";
+                document.getElementById("idParties").innerHTML = document.getElementById("idParties").innerHTML + "<tr> <td> id : " + tab[i]["id"] + " </td> <td> token : " + tab[i]["token"] + " </td> <td> en cours : oui </td> <td> Derniere photo : " + tab[i]["NumPhoto"] + " </td> <td> temps écoulé : " + tab[i]["time"] + " </td> <td> Score : " + tab[i]["Score"] + " </td> <td> <a "+StringId+" >rependre partie</a> </td> </tr><br>";
             } else {
                 document.getElementById("idParties").innerHTML = document.getElementById("idParties").innerHTML + "<tr> <td> id : " + tab[i]["id"] + " </td> <td> token : " + tab[i]["token"] + " </td> <td> en cours : non </td> <td> Derniere photo : " + tab[i]["NumPhoto"] + " </td> <td> temps écoulé : " + tab[i]["time"] + " </td> <td> Score : " + tab[i]["Score"] + " </td></tr><br>";
             }
         }
     }
 
-    function reprendrePartie(id) {
+    function reprendrePartie(id, index) {
+        lanceChrono();
+        lanceJeu(index);
+        document.getElementById("idParties").style.display = "none";
+        document.getElementById("btnStart").style.display = "none";
+        idPartie=id;
         console.log(id);
     }
 
     function afficheConnect() {
         document.getElementById("navConnect").value = "connect";
         document.getElementById("AfficheName").innerHTML = "";
+        document.getElementById("idParties").style.display = "none";
+        document.getElementById("btnStart").style.display = "none";
     }
 
     var resultTokenLogin = false;
@@ -347,6 +422,7 @@
     var nbId;
 
     $(function () {
+        document.getElementById("mapid").style.display = "none";
         $.get("/getToken").done(function (result) {
             // token = JSON.parse(result);
             token = result["token"];
@@ -361,11 +437,10 @@
             console.log(token);
 
             $.post("/login", {"id": idClient, "pwd": pwdClient, "token": token}).done(function (result) {
-                // console.log(result["res"]);
                 resultTokenLogin = result["res"];
                 console.log("test res");
                 console.log(resultTokenLogin);
-
+                    afficheDisconnect();
                 if (resultTokenLogin) {
                     $.get("/game/id=" + idClient).done(function (result2) {
                         // console.log(result2["requete"]);
@@ -378,12 +453,6 @@
                     }).fail(function (error) {
                         alert(error);
                     })
-                    // affichePartie();
-                    // lanceJeu();
-                    //
-                    // console.log(picture[0]['items'][0]['description']);
-                    //
-                    // afficheDisconnect();
                 }
             }).fail(function (error) {
                 alert(error);
@@ -426,13 +495,11 @@
         $('#navConnect').click(function () {
             document.getElementById("formulaireLogin").style.display = "block";
             document.getElementById("formulaireRegis").style.display = "none";
-            document.getElementById("news").style.display = "none";
         });
 
         $('#navRegis').click(function () {
             document.getElementById("formulaireLogin").style.display = "none";
             document.getElementById("formulaireRegis").style.display = "block";
-            document.getElementById("news").style.display = "none";
         });
 
     });
@@ -500,9 +567,13 @@
             document.getElementById('chrono').innerHTML = text;
             document.getElementById('btn_stop').style.display = 'none';
             document.getElementById('btn_pause').value = 'Reprendre';
+            document.getElementById("imgs").style.display = "none";
+            document.getElementById("mapid").style.display = "none";
         } else {
             pause = false;
             DemarrerChrono();
+            document.getElementById("imgs").style.display = "block";
+            document.getElementById("mapid").style.display = "block";
             document.getElementById('btn_pause').value = 'Pause';
         }
     }
